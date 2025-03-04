@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+// Trim whitespace of input string
 std::string trim_whitespace(std::string input)
 {
   std::string trimmed_input;
@@ -37,6 +38,7 @@ int main() {
       {
         exit(0);
       }
+      // Process echo
       else if(input=="echo" || input.find("echo ") != std::string::npos)
       {
         std::string echo_txt;
@@ -51,6 +53,31 @@ int main() {
         }
 
         std::cout << echo_txt << "\n";
+      }
+      // Process type
+      else if(input=="type" || input.find("type ") != std::string::npos)
+      {
+        std::string type_txt;
+
+        try
+        {
+          type_txt = input.substr(input.find("type") + 5);
+
+          if (type_txt == "echo" || type_txt == "exit")
+          {
+            std::cout << type_txt << " is a shell builtin\n";
+          }
+          else
+          {
+            std::cout << type_txt << ": command not found" << std::endl;
+          }
+        }
+        catch(const std::out_of_range& e)
+        {
+          type_txt = "";
+          std::cout << type_txt << "\n";
+        }
+        
       }
       else
       {
