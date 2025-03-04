@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 
+
 // Trim whitespace of input string
 std::string trim_whitespace(std::string input)
 {
@@ -63,7 +64,7 @@ int main() {
         {
           type_txt = input.substr(input.find("type") + 5);
 
-          if (type_txt == "echo" || type_txt == "exit")
+          if (type_txt == "echo" || type_txt == "exit" || type_txt == "type")
           {
             std::cout << type_txt << " is a shell builtin\n";
           }
