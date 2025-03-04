@@ -70,7 +70,7 @@ int main() {
           }
           else
           {
-            std::cout << type_txt << ": command not found" << std::endl;
+            std::cout << type_txt << ": not found" << std::endl;
           }
         }
         catch(const std::out_of_range& e)
