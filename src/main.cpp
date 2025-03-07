@@ -109,7 +109,7 @@ int main() {
                   found = find_executable(arg,dir);
                   if(found)
                   {
-                    std::cout<<arg<<" is "<< dir <<"/" << arg;
+                    std::cout<<arg<<" is "<< std::filesystem::path(dir).append(arg).string();
                     break;
                   }
                 }
