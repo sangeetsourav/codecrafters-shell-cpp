@@ -51,3 +51,4 @@ vcpkg_installed
 *.ilk
 *.pdb
 .vscode
+.vs
