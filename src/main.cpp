@@ -49,7 +49,8 @@ int main() {
 	{
 	  {"echo", "echo is a shell builtin"},
 	  {"type", "type is a shell builtin"},
-	  {"exit", "exit is a shell builtin"}
+	  {"exit", "exit is a shell builtin"},
+	  {"pwd", "pwd is a shell builtin"}
 	};
 
 	while (true)
@@ -85,6 +86,10 @@ int main() {
 			if (command == "exit")
 			{
 				exit(std::stoi(args[0]));
+			}
+			if (command == "pwd")
+			{
+				std::cout<<std::filesystem::current_path().string();
 			}
 			// echo
 			else if (command == "echo")
