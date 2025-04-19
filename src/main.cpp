@@ -7,6 +7,8 @@
 #include <iterator>
 #include <cstdlib>
 #include <filesystem>
+#include <unistd.h>
+#include <sys/wait.h>
 
 std::vector<std::string> split(const std::string& s, char delimiter)
 {
@@ -20,16 +22,20 @@ std::vector<std::string> split(const std::string& s, char delimiter)
 	return tokens;
 }
 
-bool find_executable(std::string command, std::string dir)
+std::string find_exec_in_path(std::string command, std::vector <std::string> path_dirs)
 {
-	for (const auto& entry : std::filesystem::directory_iterator(dir))
+	for (const auto& dir : path_dirs)
 	{
-		if (command == entry.path().filename())
+		for (const auto& entry : std::filesystem::directory_iterator(dir))
 		{
-			return true;
+			if (command == entry.path().filename())
+			{
+				return std::filesystem::path(dir).append(command).string();
+			}
 		}
 	}
-	return false;
+
+	return "";
 }
 
 int main() {
@@ -55,7 +61,7 @@ int main() {
 		std::string input;
 		std::getline(std::cin, input);
 
-		// Split input string based on whitespace
+		// Split input string based on whitespace of unknown length
 		std::istringstream iss(input);
 		std::vector<std::string> split_input(std::istream_iterator<std::string>{iss},
 			std::istream_iterator<std::string>());
@@ -74,14 +80,10 @@ int main() {
 		command = split_input[0];
 		args.insert(args.end(), split_input.begin() + 1, split_input.end());
 
-		// Check if command exists
-		if (builtins.count(command) == 0)
+		// Check if command is a builtin
+		if (builtins.count(command) != 0)
 		{
-			std::cout << command << ": command not found\n";
-		}
-		else
-		{
-			// Exit
+			// exit
 			if (command == "exit")
 			{
 				exit(std::stoi(args[0]));
@@ -108,25 +110,61 @@ int main() {
 					else
 					{
 						// Search in PATH
-						bool found = false;
-						for (const auto& dir : path_dirs)
-						{
-							found = find_executable(arg, dir);
-							if (found)
-							{
-								std::cout << arg << " is " << std::filesystem::path(dir).append(arg).string();
-								break;
-							}
-						}
+						std::string exec_path = find_exec_in_path(arg, path_dirs);
 
-						if (!found)
+						if(!exec_path.empty())
+						{
+							std::cout << arg << " is " << exec_path;
+						}
+						else
 						{
 							std::cout << arg << ": not found";
 						}
 					}
 				}
 			}
+
 			std::cout << "\n";
+		}
+		// Try to find command in path
+		else if (builtins.count(command) == 0)
+		{
+			// Search in PATH
+			std::string exec_path = find_exec_in_path(command, path_dirs);
+
+			if (!exec_path.empty())
+			{
+				int pid = fork();
+
+				if (pid == -1)
+				{
+					perror("fork");
+				}
+				
+				if (pid == 0)
+				{
+					std::vector<char*> argv;
+
+					for (auto arg : args)
+					{
+						argv.push_back(const_cast<char*>(arg.c_str()));
+					}
+
+					if (execvp(command.c_str(), &argv[0]) == -1)
+					{
+						perror("exec");
+					}
+				}
+				
+				if (pid > 0)
+				{
+					wait(0);
+				}
+			}
+		}
+		else
+		{
+			std::cout << command << ": command not found\n";
 		}
 
 	}
