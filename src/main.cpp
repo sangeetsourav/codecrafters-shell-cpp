@@ -50,7 +50,8 @@ int main() {
 	  {"echo", "echo is a shell builtin"},
 	  {"type", "type is a shell builtin"},
 	  {"exit", "exit is a shell builtin"},
-	  {"pwd", "pwd is a shell builtin"}
+	  {"pwd", "pwd is a shell builtin"},
+	  {"cd", "cd is a shell builtin"}
 	};
 
 	while (true)
@@ -87,9 +88,24 @@ int main() {
 			{
 				exit(std::stoi(args[0]));
 			}
-			if (command == "pwd")
+			// pwd
+			else if (command == "pwd")
 			{
-				std::cout<<std::filesystem::current_path().string();
+				std::cout<<std::filesystem::current_path().string() << "\n";
+			}
+			//cd
+			else if (command == "cd")
+			{
+				std::filesystem::path inputpath = args[0];
+				if (std::filesystem::exists(inputpath))
+				{
+					std::filesystem::current_path(inputpath);
+				}
+				else
+				{
+					std::cout << "cd: " << args[0] << ": No such file or directory\n";
+				}
+				
 			}
 			// echo
 			else if (command == "echo")
@@ -98,6 +114,7 @@ int main() {
 				{
 					std::cout << arg << " ";
 				}
+				std::cout << "\n";
 			}
 			// type
 			else if (command == "type")
@@ -108,7 +125,7 @@ int main() {
 					// First check builtins
 					if (builtins.count(arg) != 0)
 					{
-						std::cout << builtins[arg];
+						std::cout << builtins[arg] << "\n";
 					}
 					else
 					{
@@ -117,17 +134,15 @@ int main() {
 
 						if(!exec_path.empty())
 						{
-							std::cout << arg << " is " << exec_path;
+							std::cout << arg << " is " << exec_path << "\n";
 						}
 						else
 						{
-							std::cout << arg << ": not found";
+							std::cout << arg << ": not found" << "\n";
 						}
 					}
 				}
 			}
-
-			std::cout << "\n";
 		}
 		// Try to find command in path
 		else
