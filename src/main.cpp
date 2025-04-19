@@ -7,8 +7,6 @@
 #include <iterator>
 #include <cstdlib>
 #include <filesystem>
-#include <unistd.h>
-#include <sys/wait.h>
 
 std::vector<std::string> split(const std::string& s, char delimiter)
 {
@@ -127,45 +125,19 @@ int main() {
 			std::cout << "\n";
 		}
 		// Try to find command in path
-		else if (builtins.count(command) == 0)
+		else
 		{
 			// Search in PATH
 			std::string exec_path = find_exec_in_path(command, path_dirs);
 
 			if (!exec_path.empty())
 			{
-				int pid = fork();
-
-				if (pid == -1)
-				{
-					perror("fork");
-				}
-				
-				if (pid == 0)
-				{
-					std::vector<char*> argv;
-
-					for (auto arg : args)
-					{
-						argv.push_back(const_cast<char*>(arg.c_str()));
-					}
-
-					if (execvp(command.c_str(), &argv[0]) == -1)
-					{
-						perror("exec");
-					}
-				}
-				
-				if (pid > 0)
-				{
-					wait(0);
-				}
+				std::system(input.c_str());
+			}
+			else
+			{
+				std::cout << command << ": command not found\n";
 			}
 		}
-		else
-		{
-			std::cout << command << ": command not found\n";
-		}
-
 	}
 }
