@@ -108,7 +108,7 @@ int main() {
 					std::filesystem::current_path(home_path);
 				}
 				// Check if path exists
-				if (std::filesystem::exists(inputpath))
+				else if (std::filesystem::exists(inputpath))
 				{	
 					// Change current working directory, inputpath can be relative also
 					std::filesystem::current_path(inputpath);
