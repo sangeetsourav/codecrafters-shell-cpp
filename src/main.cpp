@@ -97,8 +97,10 @@ int main() {
 			else if (command == "cd")
 			{
 				std::filesystem::path inputpath = args[0];
+				// Check if path exists
 				if (std::filesystem::exists(inputpath))
-				{
+				{	
+					// Change current working directory, inputpath can be relative also
 					std::filesystem::current_path(inputpath);
 				}
 				else
