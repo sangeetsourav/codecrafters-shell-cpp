@@ -28,7 +28,7 @@ std::string find_exec_in_path(std::string command, std::vector <std::string> pat
 		{
 			if (command == entry.path().filename())
 			{
-				return std::filesystem::path(dir).append(command).string();
+				return entry.path().string();
 			}
 		}
 	}
@@ -43,7 +43,12 @@ int main() {
 
 	// Get PATH
 	const char* path_var = std::getenv("PATH");
+	// Get all directories in PATH
 	std::vector <std::string> path_dirs = split(path_var, ':');
+
+	// Get HOME
+	const char* home_var = std::getenv("HOME");
+	std::filesystem::path home_path = home_var;
 
 	std::map<std::string, std::string> builtins =
 	{
@@ -97,6 +102,11 @@ int main() {
 			else if (command == "cd")
 			{
 				std::filesystem::path inputpath = args[0];
+
+				if (args[0] == "~")
+				{
+					std::filesystem::current_path(home_path);
+				}
 				// Check if path exists
 				if (std::filesystem::exists(inputpath))
 				{	
