@@ -24,12 +24,15 @@ std::vector<std::string> tokenize(std::string input)
 		}
 		else if (in_single_quotes == true && c == '\'')
 		{
-			in_single_quotes = false;
-
-			if (!token.empty())
+			if ((i < input.size() - 1) && input[i + 1] != '\'' && input[i - 1] != '\'')
 			{
-				tokens.push_back(token);
-				token.clear();
+				in_single_quotes = false;
+				
+				if (!token.empty())
+				{
+					tokens.push_back(token);
+					token.clear();
+				}
 			}
 		}
 		else if (in_single_quotes == false)
@@ -126,11 +129,6 @@ int main() {
 
 		// Tokenize the input
 		std::vector<std::string> input_tokens = tokenize(input);
-
-		//// Split input string based on whitespace of unknown length
-		//std::istringstream iss(input);
-		//std::vector<std::string> split_input(std::istream_iterator<std::string>{iss},
-		//	std::istream_iterator<std::string>());
 
 		// Print newline and continue if input is empty
 		if (input_tokens.size() == 0)
