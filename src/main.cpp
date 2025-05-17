@@ -8,6 +8,64 @@
 #include <cstdlib>
 #include <filesystem>
 
+std::vector<std::string> tokenize(std::string input)
+{
+	std::vector<std::string> tokens;
+
+	bool in_single_quotes = false;
+	std::string token;
+	for (int i = 0; i<input.size(); i++)
+	{
+		char c = input[i];
+
+		if(in_single_quotes == false && c == '\'')
+		{
+			in_single_quotes = true;
+		}
+		else if (in_single_quotes == true && c == '\'')
+		{
+			in_single_quotes = false;
+
+			if (!token.empty())
+			{
+				tokens.push_back(token);
+				token.clear();
+			}
+		}
+		else if (in_single_quotes == false)
+		{
+			if (c != ' ')
+			{
+				token.push_back(c);
+			}
+			else
+			{
+				if (!token.empty())
+				{
+					tokens.push_back(token);
+					token.clear();
+				}
+
+			}
+		}
+		else
+		{
+			token.push_back(c);
+		}
+
+		if (i == input.size() - 1)
+		{
+			if (!token.empty())
+			{
+				tokens.push_back(token);
+				token.clear();
+			}
+		}
+	}
+
+	return tokens;
+}
+
 std::vector<std::string> split(const std::string& s, char delimiter)
 {
 	std::vector<std::string> tokens;
@@ -66,13 +124,16 @@ int main() {
 		std::string input;
 		std::getline(std::cin, input);
 
-		// Split input string based on whitespace of unknown length
-		std::istringstream iss(input);
-		std::vector<std::string> split_input(std::istream_iterator<std::string>{iss},
-			std::istream_iterator<std::string>());
+		// Tokenize the input
+		std::vector<std::string> input_tokens = tokenize(input);
+
+		//// Split input string based on whitespace of unknown length
+		//std::istringstream iss(input);
+		//std::vector<std::string> split_input(std::istream_iterator<std::string>{iss},
+		//	std::istream_iterator<std::string>());
 
 		// Print newline and continue if input is empty
-		if (split_input.size() == 0)
+		if (input_tokens.size() == 0)
 		{
 			std::cout << "\n";
 			continue;
@@ -82,8 +143,8 @@ int main() {
 		std::string command;
 		std::vector<std::string> args;
 
-		command = split_input[0];
-		args.insert(args.end(), split_input.begin() + 1, split_input.end());
+		command = input_tokens[0];
+		args.insert(args.end(), input_tokens.begin() + 1, input_tokens.end());
 
 		// Check if command is a builtin
 		if (builtins.count(command) != 0)
