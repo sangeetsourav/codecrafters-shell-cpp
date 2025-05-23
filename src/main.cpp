@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <map>
 #include <set>
 #include <iterator>
@@ -238,11 +239,43 @@ int main() {
 			// echo
 			else if (command == "echo")
 			{
-				for (const auto& arg : args)
+				std::string echo_output;
+				bool redirect = false;
+				std::string redirect_destination;
+
+				for (int i = 0; i < args.size(); i++)
 				{
-					std::cout << arg << " ";
+					if (args[i].compare(">") == 0 || args[i].compare("1>") == 0)
+					{
+						redirect = true;
+						redirect_destination = args[i + 1];
+						i++;
+					}
+					else
+					{
+						if (echo_output.empty())
+						{
+							echo_output.append(args[i]);
+						}
+						else
+						{
+							echo_output.append(" ");
+							echo_output.append(args[i]);
+						}
+					}
+
 				}
-				std::cout << "\n";
+
+				if (!redirect)
+				{
+					std::cout << echo_output << "\n" ;
+				}
+				else
+				{
+					std::ofstream redirect_echo(redirect_destination);
+					redirect_echo << echo_output << "\n";
+					redirect_echo.close();
+				}
 			}
 			// type
 			else if (command == "type")
