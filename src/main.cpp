@@ -240,14 +240,21 @@ int main() {
 			else if (command == "echo")
 			{
 				std::string echo_output;
-				bool redirect = false;
+				bool stdout_redirect = false;
+				bool stderr_redirect = false;
 				std::string redirect_destination;
 
 				for (int i = 0; i < args.size(); i++)
 				{
-					if (args[i].compare(">") == 0 || args[i].compare("1>") == 0)
+					if (args[i].compare(">") == 0 || args[i].compare("1>") == 0 )
 					{
-						redirect = true;
+						stdout_redirect = true;
+						redirect_destination = args[i + 1];
+						i++;
+					}
+					else if (args[i].compare("2>") == 0)
+					{
+						stderr_redirect = true;
 						redirect_destination = args[i + 1];
 						i++;
 					}
@@ -266,7 +273,7 @@ int main() {
 
 				}
 
-				if (!redirect)
+				if (!stdout_redirect)
 				{
 					std::cout << echo_output << "\n" ;
 				}
@@ -274,6 +281,12 @@ int main() {
 				{
 					std::ofstream redirect_echo(redirect_destination);
 					redirect_echo << echo_output << "\n";
+					redirect_echo.close();
+				}
+
+				if (stderr_redirect)
+				{
+					std::ofstream redirect_echo(redirect_destination);
 					redirect_echo.close();
 				}
 			}
