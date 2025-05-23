@@ -13,16 +13,22 @@ std::vector<std::string> tokenize(std::string input)
 	std::vector<std::string> tokens;
 
 	bool in_single_quotes = false;
+	bool in_double_quotes = false;
+
 	std::string token;
 	for (int i = 0; i<input.size(); i++)
 	{
 		char c = input[i];
 
-		if(in_single_quotes == false && c == '\'')
+		if(!in_single_quotes && !in_double_quotes && c == '\'')
 		{
 			in_single_quotes = true;
 		}
-		else if (in_single_quotes == true && c == '\'')
+		else if (!in_single_quotes && !in_double_quotes && c == '\"')
+		{
+			in_double_quotes = true;
+		}
+		else if (in_single_quotes && c == '\'')
 		{
 			if ((i < input.size() - 1) && input[i + 1] != '\'' && input[i - 1] != '\'')
 			{
@@ -35,7 +41,20 @@ std::vector<std::string> tokenize(std::string input)
 				}
 			}
 		}
-		else if (in_single_quotes == false)
+		else if (in_double_quotes && c == '\"')
+		{
+			if ((i < input.size() - 1) && input[i + 1] != '\"' && input[i - 1] != '\"')
+			{
+				in_double_quotes = false;
+
+				if (!token.empty())
+				{
+					tokens.push_back(token);
+					token.clear();
+				}
+			}
+		}
+		else if (!in_single_quotes && !in_double_quotes)
 		{
 			if (c != ' ')
 			{
