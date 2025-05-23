@@ -34,32 +34,12 @@ std::vector<std::string> tokenize(std::string input)
 		// Check if single quote has ended
 		else if (in_single_quotes && c == '\'')
 		{
-			// End single quote if another single quote is not the next character
-			if ((i < input.size() - 1) && input[i + 1] != '\'' && input[i - 1] != '\'')
-			{
-				in_single_quotes = false;
-				
-				if (!token.empty())
-				{
-					tokens.push_back(token);
-					token.clear();
-				}
-			}
+			in_single_quotes = false;
 		}
 		// Check if double quote has ended and that the ending quote has not been escaped
 		else if (in_double_quotes && c == '\"' && !escape_next_char)
 		{
-			// End double quote if another double quote is not the next character
-			if ((i < input.size() - 1) && input[i + 1] != '\"' && input[i - 1] != '\"')
-			{
-				in_double_quotes = false;
-
-				if (!token.empty())
-				{
-					tokens.push_back(token);
-					token.clear();
-				}
-			}
+			in_double_quotes = false;
 		}
 		// Check if text is neither single-quoted nor double-quoted
 		else if (!in_single_quotes && !in_double_quotes)
