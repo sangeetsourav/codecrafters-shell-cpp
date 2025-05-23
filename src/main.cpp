@@ -9,6 +9,11 @@
 #include <cstdlib>
 #include <filesystem>
 
+/**
+ * @brief Splits the input string into tokens, handling whitespace, single and double quotes, and escape characters.
+ * @param input The string to be tokenized.
+ * @return A vector of strings, each representing a token extracted from the input.
+ */
 std::vector<std::string> tokenize(std::string input)
 {
 	std::vector<std::string> tokens;
@@ -127,6 +132,12 @@ std::vector<std::string> tokenize(std::string input)
 	return tokens;
 }
 
+/**
+ * @brief Splits a string into a vector of substrings based on a specified delimiter character.
+ * @param s The input string to split.
+ * @param delimiter The character used to separate the substrings.
+ * @return A vector containing the substrings resulting from splitting the input string by the delimiter.
+ */
 std::vector<std::string> split(const std::string& s, char delimiter)
 {
 	std::vector<std::string> tokens;
@@ -139,6 +150,12 @@ std::vector<std::string> split(const std::string& s, char delimiter)
 	return tokens;
 }
 
+/**
+ * @brief Searches for an executable file with the specified name in the given list of directories.
+ * @param command The name of the executable file to search for.
+ * @param path_dirs A vector of directory paths to search within.
+ * @return The full path to the found executable file, or an empty string if not found.
+ */
 std::string find_exec_in_path(std::string command, std::vector <std::string> path_dirs)
 {
 	for (const auto& dir : path_dirs)
@@ -157,6 +174,7 @@ std::string find_exec_in_path(std::string command, std::vector <std::string> pat
 
 // Get PATH
 const char* path_var = std::getenv("PATH");
+
 // Get all directories in PATH
 std::vector <std::string> path_dirs = split(path_var, ':');
 
@@ -164,6 +182,9 @@ std::vector <std::string> path_dirs = split(path_var, ':');
 const char* home_var = std::getenv("HOME");
 std::filesystem::path home_path = home_var;
 
+/**
+ * @brief A map containing descriptions of common shell built-in commands.
+ */
 std::map<std::string, std::string> builtins =
 {
   {"echo", "echo is a shell builtin"},
@@ -173,7 +194,10 @@ std::map<std::string, std::string> builtins =
   {"cd", "cd is a shell builtin"}
 };
 
-
+/**
+ * @brief Implements an echo command that outputs text or redirects it to a file, supporting standard output and error redirection.
+ * @param args A vector of strings representing the command-line arguments, including the text to echo and any redirection operators (e.g., ">", ">>", "1>", "2>", etc.).
+ */
 void command_echo(std::vector<std::string> args)
 {
 	std::string echo_output;
@@ -263,6 +287,10 @@ void command_echo(std::vector<std::string> args)
 	}
 }
 
+/**
+ * @brief Changes the current working directory based on the provided path argument.
+ * @param args A vector of strings containing the arguments for the 'cd' command. The first element should be the target directory path.
+ */
 void command_cd(std::vector<std::string> args)
 {
 	std::filesystem::path inputpath = args[0];
@@ -283,6 +311,10 @@ void command_cd(std::vector<std::string> args)
 	}
 }
 
+/**
+ * @brief Prints the type or location of each command specified in the argument list.
+ * @param args A vector of command names to look up.
+ */
 void command_type(std::vector<std::string> args)
 {
 	// Find command
