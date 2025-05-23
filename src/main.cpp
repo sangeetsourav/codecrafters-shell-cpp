@@ -14,7 +14,7 @@ std::vector<std::string> tokenize(std::string input)
 
 	bool in_single_quotes = false;
 	bool in_double_quotes = false;
-	bool non_quoted_backslash = false;
+	bool escape_next_char = false;
 
 	std::string token;
 	for (int i = 0; i<input.size(); i++)
@@ -22,12 +22,12 @@ std::vector<std::string> tokenize(std::string input)
 		char c = input[i];
 
 		// Check if single quote has started and it has not been escaped
-		if(!in_single_quotes && !in_double_quotes && !non_quoted_backslash && c == '\'')
+		if(!in_single_quotes && !in_double_quotes && !escape_next_char && c == '\'')
 		{
 			in_single_quotes = true;
 		}
 		// Check if double quote has started and it has not been escaped
-		else if (!in_single_quotes && !in_double_quotes && !non_quoted_backslash && c == '\"')
+		else if (!in_single_quotes && !in_double_quotes && !escape_next_char && c == '\"')
 		{
 			in_double_quotes = true;
 		}
@@ -46,8 +46,8 @@ std::vector<std::string> tokenize(std::string input)
 				}
 			}
 		}
-		// Check if double quote has ended
-		else if (in_double_quotes && c == '\"')
+		// Check if double quote has ended and that the ending quote has not been escaped
+		else if (in_double_quotes && c == '\"' && !escape_next_char)
 		{
 			// End double quote if another double quote is not the next character
 			if ((i < input.size() - 1) && input[i + 1] != '\"' && input[i - 1] != '\"')
@@ -67,13 +67,13 @@ std::vector<std::string> tokenize(std::string input)
 			// Check if backslash has been encountered
 			if (c == '\\')
 			{
-				non_quoted_backslash = true;
+				escape_next_char = true;
 			}
 			// Push character after backslash
-			else if (non_quoted_backslash)
+			else if (escape_next_char)
 			{
 				token.push_back(c);
-				non_quoted_backslash = false;
+				escape_next_char = false;
 			}
 			// If backslash has not been encountered
 			else
@@ -97,8 +97,31 @@ std::vector<std::string> tokenize(std::string input)
 		// Text is either single-quoted or double-quoted
 		else
 		{
-			// Keep increasing token size
-			token.push_back(c);
+			if (in_double_quotes)
+			{
+				// Check if backslash has been encountered
+				if (c == '\\' and !escape_next_char)
+				{
+					escape_next_char = true;
+				}
+				// Push character after backslash
+				else if (escape_next_char)
+				{
+					token.push_back(c);
+					escape_next_char = false;
+				}
+				else
+				{
+					// Keep increasing token size
+					token.push_back(c);
+				}
+			}
+
+			if (in_single_quotes)
+			{
+				// Keep increasing token size
+				token.push_back(c);
+			}
 		}
 
 	}
