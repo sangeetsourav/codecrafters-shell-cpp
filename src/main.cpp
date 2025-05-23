@@ -242,6 +242,8 @@ int main() {
 				std::string echo_output;
 				bool stdout_redirect = false;
 				bool stderr_redirect = false;
+				bool redirect_append = false;
+
 				std::string redirect_destination;
 
 				for (int i = 0; i < args.size(); i++)
@@ -255,6 +257,20 @@ int main() {
 					else if (args[i].compare("2>") == 0)
 					{
 						stderr_redirect = true;
+						redirect_destination = args[i + 1];
+						i++;
+					}
+					else if (args[i].compare(">>") == 0 || args[i].compare("1>>") == 0)
+					{
+						stdout_redirect = true;
+						redirect_append = true;
+						redirect_destination = args[i + 1];
+						i++;
+					}
+					else if (args[i].compare("2>>") == 0)
+					{
+						stderr_redirect = true;
+						redirect_append = true;
 						redirect_destination = args[i + 1];
 						i++;
 					}
@@ -279,14 +295,33 @@ int main() {
 				}
 				else
 				{
-					std::ofstream redirect_echo(redirect_destination);
+					std::ofstream redirect_echo;
+
+					if (redirect_append)
+					{
+						redirect_echo.open(redirect_destination, std::ofstream::app);
+					}
+					else
+					{
+						redirect_echo.open(redirect_destination);
+					}
+				
 					redirect_echo << echo_output << "\n";
 					redirect_echo.close();
 				}
 
 				if (stderr_redirect)
 				{
-					std::ofstream redirect_echo(redirect_destination);
+					std::ofstream redirect_echo;
+
+					if (redirect_append)
+					{
+						redirect_echo.open(redirect_destination, std::ofstream::app);
+					}
+					else
+					{
+						redirect_echo.open(redirect_destination);
+					}
 					redirect_echo.close();
 				}
 			}
