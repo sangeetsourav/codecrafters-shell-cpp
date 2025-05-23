@@ -20,16 +20,20 @@ std::vector<std::string> tokenize(std::string input)
 	{
 		char c = input[i];
 
+		// Check if single quote has started
 		if(!in_single_quotes && !in_double_quotes && c == '\'')
 		{
 			in_single_quotes = true;
 		}
+		// Check if double quote has started
 		else if (!in_single_quotes && !in_double_quotes && c == '\"')
 		{
 			in_double_quotes = true;
 		}
+		// Check if single quote has ended
 		else if (in_single_quotes && c == '\'')
 		{
+			// End single quote if another single quote is not the next character
 			if ((i < input.size() - 1) && input[i + 1] != '\'' && input[i - 1] != '\'')
 			{
 				in_single_quotes = false;
@@ -41,8 +45,10 @@ std::vector<std::string> tokenize(std::string input)
 				}
 			}
 		}
+		// Check if double quote has ended
 		else if (in_double_quotes && c == '\"')
 		{
+			// End double quote if another double quote is not the next character
 			if ((i < input.size() - 1) && input[i + 1] != '\"' && input[i - 1] != '\"')
 			{
 				in_double_quotes = false;
@@ -54,14 +60,17 @@ std::vector<std::string> tokenize(std::string input)
 				}
 			}
 		}
+		// Check if text is neither single-quoted nor double-quoted
 		else if (!in_single_quotes && !in_double_quotes)
 		{
+			// Keep increasing token size if whitespace is not encountered
 			if (c != ' ')
 			{
 				token.push_back(c);
 			}
 			else
 			{
+				// When whitespace is encountered, push token to token list and clear token
 				if (!token.empty())
 				{
 					tokens.push_back(token);
@@ -70,19 +79,20 @@ std::vector<std::string> tokenize(std::string input)
 
 			}
 		}
+		// Text is either single-quoted or double-quoted
 		else
 		{
+			// Keep increasing token size
 			token.push_back(c);
 		}
 
-		if (i == input.size() - 1)
-		{
-			if (!token.empty())
-			{
-				tokens.push_back(token);
-				token.clear();
-			}
-		}
+	}
+
+	// Push last non-empty token into token list
+	if (!token.empty())
+	{
+		tokens.push_back(token);
+		token.clear();
 	}
 
 	return tokens;
