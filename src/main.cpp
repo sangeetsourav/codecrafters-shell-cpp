@@ -14,19 +14,20 @@ std::vector<std::string> tokenize(std::string input)
 
 	bool in_single_quotes = false;
 	bool in_double_quotes = false;
+	bool non_quoted_backslash = false;
 
 	std::string token;
 	for (int i = 0; i<input.size(); i++)
 	{
 		char c = input[i];
 
-		// Check if single quote has started
-		if(!in_single_quotes && !in_double_quotes && c == '\'')
+		// Check if single quote has started and it has not been escaped
+		if(!in_single_quotes && !in_double_quotes && !non_quoted_backslash && c == '\'')
 		{
 			in_single_quotes = true;
 		}
-		// Check if double quote has started
-		else if (!in_single_quotes && !in_double_quotes && c == '\"')
+		// Check if double quote has started and it has not been escaped
+		else if (!in_single_quotes && !in_double_quotes && !non_quoted_backslash && c == '\"')
 		{
 			in_double_quotes = true;
 		}
@@ -63,20 +64,34 @@ std::vector<std::string> tokenize(std::string input)
 		// Check if text is neither single-quoted nor double-quoted
 		else if (!in_single_quotes && !in_double_quotes)
 		{
-			// Keep increasing token size if whitespace is not encountered
-			if (c != ' ')
+			// Check if backslash has been encountered
+			if (c == '\\')
+			{
+				non_quoted_backslash = true;
+			}
+			// Push character after backslash
+			else if (non_quoted_backslash)
 			{
 				token.push_back(c);
+				non_quoted_backslash = false;
 			}
+			// If backslash has not been encountered
 			else
 			{
-				// When whitespace is encountered, push token to token list and clear token
-				if (!token.empty())
+				// Keep increasing token size if whitespace is not encountered
+				if (c != ' ')
 				{
-					tokens.push_back(token);
-					token.clear();
+					token.push_back(c);
 				}
-
+				else
+				{
+					// When whitespace is encountered, push token to token list and clear token
+					if (!token.empty())
+					{
+						tokens.push_back(token);
+						token.clear();
+					}
+				}
 			}
 		}
 		// Text is either single-quoted or double-quoted
