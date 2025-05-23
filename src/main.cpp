@@ -155,28 +155,165 @@ std::string find_exec_in_path(std::string command, std::vector <std::string> pat
 	return "";
 }
 
+// Get PATH
+const char* path_var = std::getenv("PATH");
+// Get all directories in PATH
+std::vector <std::string> path_dirs = split(path_var, ':');
+
+// Get HOME
+const char* home_var = std::getenv("HOME");
+std::filesystem::path home_path = home_var;
+
+std::map<std::string, std::string> builtins =
+{
+  {"echo", "echo is a shell builtin"},
+  {"type", "type is a shell builtin"},
+  {"exit", "exit is a shell builtin"},
+  {"pwd", "pwd is a shell builtin"},
+  {"cd", "cd is a shell builtin"}
+};
+
+
+void command_echo(std::vector<std::string> args)
+{
+	std::string echo_output;
+	bool stdout_redirect = false;
+	bool stderr_redirect = false;
+	bool redirect_append = false;
+
+	std::string redirect_destination;
+
+	for (int i = 0; i < args.size(); i++)
+	{
+		if (args[i].compare(">") == 0 || args[i].compare("1>") == 0)
+		{
+			stdout_redirect = true;
+			redirect_destination = args[i + 1];
+			i++;
+		}
+		else if (args[i].compare("2>") == 0)
+		{
+			stderr_redirect = true;
+			redirect_destination = args[i + 1];
+			i++;
+		}
+		else if (args[i].compare(">>") == 0 || args[i].compare("1>>") == 0)
+		{
+			stdout_redirect = true;
+			redirect_append = true;
+			redirect_destination = args[i + 1];
+			i++;
+		}
+		else if (args[i].compare("2>>") == 0)
+		{
+			stderr_redirect = true;
+			redirect_append = true;
+			redirect_destination = args[i + 1];
+			i++;
+		}
+		else
+		{
+			if (echo_output.empty())
+			{
+				echo_output.append(args[i]);
+			}
+			else
+			{
+				echo_output.append(" ");
+				echo_output.append(args[i]);
+			}
+		}
+
+	}
+
+	if (!stdout_redirect)
+	{
+		std::cout << echo_output << "\n";
+	}
+	else
+	{
+		std::ofstream redirect_echo;
+
+		if (redirect_append)
+		{
+			redirect_echo.open(redirect_destination, std::ofstream::app);
+		}
+		else
+		{
+			redirect_echo.open(redirect_destination);
+		}
+
+		redirect_echo << echo_output << "\n";
+		redirect_echo.close();
+	}
+
+	if (stderr_redirect)
+	{
+		std::ofstream redirect_echo;
+
+		if (redirect_append)
+		{
+			redirect_echo.open(redirect_destination, std::ofstream::app);
+		}
+		else
+		{
+			redirect_echo.open(redirect_destination);
+		}
+		redirect_echo.close();
+	}
+}
+
+void command_cd(std::vector<std::string> args)
+{
+	std::filesystem::path inputpath = args[0];
+
+	if (args[0] == "~")
+	{
+		std::filesystem::current_path(home_path);
+	}
+	// Check if path exists
+	else if (std::filesystem::exists(inputpath))
+	{
+		// Change current working directory, inputpath can be relative also
+		std::filesystem::current_path(inputpath);
+	}
+	else
+	{
+		std::cout << "cd: " << args[0] << ": No such file or directory\n";
+	}
+}
+
+void command_type(std::vector<std::string> args)
+{
+	// Find command
+	for (const auto& arg : args)
+	{
+		// First check builtins
+		if (builtins.count(arg) != 0)
+		{
+			std::cout << builtins[arg] << "\n";
+		}
+		else
+		{
+			// Search in PATH
+			std::string exec_path = find_exec_in_path(arg, path_dirs);
+
+			if (!exec_path.empty())
+			{
+				std::cout << arg << " is " << exec_path << "\n";
+			}
+			else
+			{
+				std::cout << arg << ": not found" << "\n";
+			}
+		}
+	}
+}
+
 int main() {
 	// Flush after every std::cout / std:cerr
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
-
-	// Get PATH
-	const char* path_var = std::getenv("PATH");
-	// Get all directories in PATH
-	std::vector <std::string> path_dirs = split(path_var, ':');
-
-	// Get HOME
-	const char* home_var = std::getenv("HOME");
-	std::filesystem::path home_path = home_var;
-
-	std::map<std::string, std::string> builtins =
-	{
-	  {"echo", "echo is a shell builtin"},
-	  {"type", "type is a shell builtin"},
-	  {"exit", "exit is a shell builtin"},
-	  {"pwd", "pwd is a shell builtin"},
-	  {"cd", "cd is a shell builtin"}
-	};
 
 	while (true)
 	{
@@ -218,139 +355,17 @@ int main() {
 			//cd
 			else if (command == "cd")
 			{
-				std::filesystem::path inputpath = args[0];
-
-				if (args[0] == "~")
-				{
-					std::filesystem::current_path(home_path);
-				}
-				// Check if path exists
-				else if (std::filesystem::exists(inputpath))
-				{	
-					// Change current working directory, inputpath can be relative also
-					std::filesystem::current_path(inputpath);
-				}
-				else
-				{
-					std::cout << "cd: " << args[0] << ": No such file or directory\n";
-				}
-				
+				command_cd(args);
 			}
 			// echo
 			else if (command == "echo")
 			{
-				std::string echo_output;
-				bool stdout_redirect = false;
-				bool stderr_redirect = false;
-				bool redirect_append = false;
-
-				std::string redirect_destination;
-
-				for (int i = 0; i < args.size(); i++)
-				{
-					if (args[i].compare(">") == 0 || args[i].compare("1>") == 0 )
-					{
-						stdout_redirect = true;
-						redirect_destination = args[i + 1];
-						i++;
-					}
-					else if (args[i].compare("2>") == 0)
-					{
-						stderr_redirect = true;
-						redirect_destination = args[i + 1];
-						i++;
-					}
-					else if (args[i].compare(">>") == 0 || args[i].compare("1>>") == 0)
-					{
-						stdout_redirect = true;
-						redirect_append = true;
-						redirect_destination = args[i + 1];
-						i++;
-					}
-					else if (args[i].compare("2>>") == 0)
-					{
-						stderr_redirect = true;
-						redirect_append = true;
-						redirect_destination = args[i + 1];
-						i++;
-					}
-					else
-					{
-						if (echo_output.empty())
-						{
-							echo_output.append(args[i]);
-						}
-						else
-						{
-							echo_output.append(" ");
-							echo_output.append(args[i]);
-						}
-					}
-
-				}
-
-				if (!stdout_redirect)
-				{
-					std::cout << echo_output << "\n" ;
-				}
-				else
-				{
-					std::ofstream redirect_echo;
-
-					if (redirect_append)
-					{
-						redirect_echo.open(redirect_destination, std::ofstream::app);
-					}
-					else
-					{
-						redirect_echo.open(redirect_destination);
-					}
-				
-					redirect_echo << echo_output << "\n";
-					redirect_echo.close();
-				}
-
-				if (stderr_redirect)
-				{
-					std::ofstream redirect_echo;
-
-					if (redirect_append)
-					{
-						redirect_echo.open(redirect_destination, std::ofstream::app);
-					}
-					else
-					{
-						redirect_echo.open(redirect_destination);
-					}
-					redirect_echo.close();
-				}
+				command_echo(args);
 			}
 			// type
 			else if (command == "type")
 			{
-				// Find command
-				for (const auto& arg : args)
-				{
-					// First check builtins
-					if (builtins.count(arg) != 0)
-					{
-						std::cout << builtins[arg] << "\n";
-					}
-					else
-					{
-						// Search in PATH
-						std::string exec_path = find_exec_in_path(arg, path_dirs);
-
-						if(!exec_path.empty())
-						{
-							std::cout << arg << " is " << exec_path << "\n";
-						}
-						else
-						{
-							std::cout << arg << ": not found" << "\n";
-						}
-					}
-				}
+				command_type(args);
 			}
 		}
 		// Try to find command in path
