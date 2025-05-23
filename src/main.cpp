@@ -79,16 +79,26 @@ std::vector<std::string> tokenize(std::string input)
 		{
 			if (in_double_quotes)
 			{
-				// Check if backslash has been encountered
-				if (c == '\\' and !escape_next_char)
-				{
-					escape_next_char = true;
-				}
-				// Push character after backslash
-				else if (escape_next_char)
+				// Escape character
+				if (escape_next_char)
 				{
 					token.push_back(c);
 					escape_next_char = false;
+				}
+				// Check if backslash has been encountered
+				else if (c == '\\' && !escape_next_char)
+				{	
+
+					if (input[i + 1] == '\\' || input[i + 1] == '$' || input[i + 1] == '\"')
+					{
+						escape_next_char = true;
+					}
+					else
+					{
+						// Keep increasing token size
+						token.push_back(c);
+					}
+
 				}
 				else
 				{
