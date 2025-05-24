@@ -183,7 +183,7 @@ const char* home_var = std::getenv("HOME");
 std::filesystem::path home_path = home_var;
 
 /**
- * @brief A map containing descriptions of common shell built-in commands.
+ * @brief A map containing descriptions of shell built-in commands.
  */
 std::map<std::string, std::string> builtins =
 {
@@ -209,25 +209,31 @@ void command_echo(std::vector<std::string> args)
 
 	for (int i = 0; i < args.size(); i++)
 	{
+		// Check for stdout redirect
 		if (args[i].compare(">") == 0 || args[i].compare("1>") == 0)
 		{
 			stdout_redirect = true;
 			redirect_destination = args[i + 1];
 			i++;
 		}
+		// Check for sterr redirect
 		else if (args[i].compare("2>") == 0)
 		{
 			stderr_redirect = true;
 			redirect_destination = args[i + 1];
 			i++;
 		}
+		// Check for stdout redirect with append
 		else if (args[i].compare(">>") == 0 || args[i].compare("1>>") == 0)
 		{
 			stdout_redirect = true;
 			redirect_append = true;
+			// The next token is the path
 			redirect_destination = args[i + 1];
+			// Jump to token after the path (if available)
 			i++;
 		}
+		// Check for stderr redirect with append
 		else if (args[i].compare("2>>") == 0)
 		{
 			stderr_redirect = true;
@@ -237,6 +243,7 @@ void command_echo(std::vector<std::string> args)
 		}
 		else
 		{
+			// Keep building the echo output
 			if (echo_output.empty())
 			{
 				echo_output.append(args[i]);
@@ -250,14 +257,17 @@ void command_echo(std::vector<std::string> args)
 
 	}
 
+	// No stdout redirection
 	if (!stdout_redirect)
 	{
 		std::cout << echo_output << "\n";
 	}
+	// Stdout redirection
 	else
 	{
 		std::ofstream redirect_echo;
 
+		// If append redirect
 		if (redirect_append)
 		{
 			redirect_echo.open(redirect_destination, std::ofstream::app);
@@ -271,10 +281,12 @@ void command_echo(std::vector<std::string> args)
 		redirect_echo.close();
 	}
 
+	// stderr redirection
 	if (stderr_redirect)
 	{
 		std::ofstream redirect_echo;
 
+		// if append redirect
 		if (redirect_append)
 		{
 			redirect_echo.open(redirect_destination, std::ofstream::app);
@@ -283,6 +295,7 @@ void command_echo(std::vector<std::string> args)
 		{
 			redirect_echo.open(redirect_destination);
 		}
+
 		redirect_echo.close();
 	}
 }
