@@ -10,4 +10,4 @@ add_executable(shell ${SOURCE_FILES})
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(readline REQUIRED IMPORTED_TARGET readline)
-target_link_libraries(main PRIVATE PkgConfig::readline)
+target_link_libraries(shell PRIVATE PkgConfig::readline)
