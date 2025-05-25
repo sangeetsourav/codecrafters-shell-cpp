@@ -8,6 +8,8 @@
 #include <iterator>
 #include <cstdlib>
 #include <filesystem>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 /**
  * @brief Splits the input string into tokens, handling whitespace, single and double quotes, and escape characters.
@@ -363,19 +365,26 @@ int main() {
 	while (true)
 	{
 
-		std::cout << "$ ";
+		std::string prompt = "$ ";
 		std::string input;
-		std::getline(std::cin, input);
 
-		// Tokenize the input
-		std::vector<std::string> input_tokens = tokenize(input);
+		// Use readline to get input
+		input = readline(prompt.c_str());
 
 		// Print newline and continue if input is empty
-		if (input_tokens.size() == 0)
+		if (input.empty())
 		{
 			std::cout << "\n";
 			continue;
 		}
+		else
+		{	
+			// Add command to history
+			add_history(input.c_str());
+		}
+
+		// Tokenize the input
+		std::vector<std::string> input_tokens = tokenize(input);
 
 		// Extract command and arguments
 		std::string command;
