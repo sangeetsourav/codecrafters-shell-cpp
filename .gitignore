@@ -34,7 +34,7 @@ server
 
 # CMake
 CMakeLists.txt.user
-CMakePresets.json
+CMakeUserPresets.json
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
