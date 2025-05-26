@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <filesystem>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "builtins.hpp"
@@ -34,7 +33,7 @@ int main() {
 		}
 
 		// Tokenize the input
-		std::vector<std::string> input_tokens = tokenize(input);
+		std::vector<std::string> input_tokens = util::tokenize(input);
 
 		// Extract command and arguments
 		std::string command;
@@ -44,16 +43,16 @@ int main() {
 		args.insert(args.end(), input_tokens.begin() + 1, input_tokens.end());
 
 		// Check if command is a builtin
-		if (builtins.count(command) != 0)
+		if (builtins::commands.count(command) != 0)
 		{
 			// Run the builtin command
-			builtins[command].second(args);
+			builtins::commands[command].second(args);
 		}
 		// Try to find command in path
 		else
 		{
 			// Search in PATH
-			std::string exec_path = find_exec_in_path(command, path_dirs);
+			std::string exec_path = util::find_exec_in_path(command);
 
 			if (!exec_path.empty())
 			{
