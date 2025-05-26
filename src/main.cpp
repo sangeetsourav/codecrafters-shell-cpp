@@ -184,23 +184,30 @@ std::vector <std::string> path_dirs = split(path_var, ':');
 const char* home_var = std::getenv("HOME");
 std::filesystem::path home_path = home_var;
 
+// Builtin functions declarations
+void command_echo(std::vector<std::string>&);
+void command_cd(std::vector<std::string>&);
+void command_type(std::vector<std::string>&);
+void command_pwd(std::vector<std::string>&);
+void command_exit(std::vector<std::string>&);
+
 /**
- * @brief A map containing descriptions of shell built-in commands.
+ * @brief A map containing descriptions and function pointers of shell built-in commands.
  */
-std::map<std::string, std::string> builtins =
+std::map<std::string, std::pair<std::string,void(*)(std::vector<std::string>&)>> builtins =
 {
-  {"echo", "echo is a shell builtin"},
-  {"type", "type is a shell builtin"},
-  {"exit", "exit is a shell builtin"},
-  {"pwd", "pwd is a shell builtin"},
-  {"cd", "cd is a shell builtin"}
+  {"echo", std::make_pair("echo is a shell builtin", command_echo)},
+  {"type", std::make_pair("type is a shell builtin", command_type)},
+  {"exit", std::make_pair("exit is a shell builtin", command_exit)},
+  {"pwd", std::make_pair("pwd is a shell builtin", command_pwd)},
+  {"cd", std::make_pair("cd is a shell builtin", command_cd)}
 };
 
 /**
  * @brief Implements an echo command that outputs text or redirects it to a file, supporting standard output and error redirection.
- * @param args A vector of strings representing the command-line arguments, including the text to echo and any redirection operators (e.g., ">", ">>", "1>", "2>", etc.).
+ * @param args A reference to the vector of strings representing the command-line arguments, including the text to echo and any redirection operators (e.g., ">", ">>", "1>", "2>", etc.).
  */
-void command_echo(std::vector<std::string> args)
+void command_echo(std::vector<std::string> &args)
 {
 	std::string echo_output;
 	bool stdout_redirect = false;
@@ -304,9 +311,9 @@ void command_echo(std::vector<std::string> args)
 
 /**
  * @brief Changes the current working directory based on the provided path argument.
- * @param args A vector of strings containing the arguments for the 'cd' command. The first element should be the target directory path.
+ * @param args A reference to the vector of strings containing the arguments for the 'cd' command. The first element should be the target directory path.
  */
-void command_cd(std::vector<std::string> args)
+void command_cd(std::vector<std::string> &args)
 {
 	std::filesystem::path inputpath = args[0];
 
@@ -328,9 +335,9 @@ void command_cd(std::vector<std::string> args)
 
 /**
  * @brief Prints the type or location of each command specified in the argument list.
- * @param args A vector of command names to look up.
+ * @param args A reference to the vector of command names to look up.
  */
-void command_type(std::vector<std::string> args)
+void command_type(std::vector<std::string> &args)
 {
 	// Find command
 	for (const auto& arg : args)
@@ -338,7 +345,7 @@ void command_type(std::vector<std::string> args)
 		// First check builtins
 		if (builtins.count(arg) != 0)
 		{
-			std::cout << builtins[arg] << "\n";
+			std::cout << builtins[arg].first << "\n";
 		}
 		else
 		{
@@ -355,6 +362,26 @@ void command_type(std::vector<std::string> args)
 			}
 		}
 	}
+}
+
+/**
+ * @brief Exits the shell with the provided exit code.
+ * @param args A reference to the vector of strings where the first element is the exit code as a string.
+ */
+void command_exit(std::vector<std::string> &args)
+{
+	// Call the exit function with the integer present in the first argument
+	exit(std::stoi(args[0]));
+}
+
+/**
+ * @brief Prints the current working directory to standard output.
+ * @param args A reference to the vector of strings containing the arguments for the 'pwd' command (unused).
+ */
+void command_pwd(std::vector<std::string> &args)
+{
+	// Print the current path
+	std::cout << std::filesystem::current_path().string() << "\n";
 }
 
 int main() {
@@ -396,31 +423,8 @@ int main() {
 		// Check if command is a builtin
 		if (builtins.count(command) != 0)
 		{
-			// exit
-			if (command == "exit")
-			{
-				exit(std::stoi(args[0]));
-			}
-			// pwd
-			else if (command == "pwd")
-			{
-				std::cout<<std::filesystem::current_path().string() << "\n";
-			}
-			//cd
-			else if (command == "cd")
-			{
-				command_cd(args);
-			}
-			// echo
-			else if (command == "echo")
-			{
-				command_echo(args);
-			}
-			// type
-			else if (command == "type")
-			{
-				command_type(args);
-			}
+			// Run the builtin command
+			builtins[command].second(args);
 		}
 		// Try to find command in path
 		else
