@@ -148,8 +148,6 @@ namespace util {
 		return tokens;
 	}
 
-	std::map<std::string, std::string> remember_exec_paths;
-
 	/**
 	 * @brief Searches for an executable file with the specified name in the given list of directories.
 	 * @param command The name of the executable file to search for.
@@ -157,11 +155,6 @@ namespace util {
 	 */
 	std::string find_exec_in_path(std::string command)
 	{
-		if (remember_exec_paths.count(command) != 0)
-		{
-			return remember_exec_paths[command];
-		}
-
 		std::string exec_path = "";
 
 		// It will look through the path directories
@@ -185,12 +178,10 @@ namespace util {
 				{
 					// Store in memor
 					exec_path = entry.path().string();
+					return exec_path;
 				}
 			}
 		}
-
-		// Remember path for this command for future use
-		remember_exec_paths[command] = exec_path;
 
 		return exec_path;
 	}
