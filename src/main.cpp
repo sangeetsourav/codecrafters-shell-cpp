@@ -205,7 +205,7 @@ std::map<std::string, std::pair<std::string,void(*)(std::vector<std::string>&)>>
 
 /**
  * @brief Implements an echo command that outputs text or redirects it to a file, supporting standard output and error redirection.
- * @param args A reference to the vector of strings representing the command-line arguments, including the text to echo and any redirection operators (e.g., ">", ">>", "1>", "2>", etc.).
+ * @param args A vector of strings representing the command-line arguments, including the text to echo and any redirection operators (e.g., ">", ">>", "1>", "2>", etc.).
  */
 void command_echo(std::vector<std::string> &args)
 {
@@ -311,7 +311,7 @@ void command_echo(std::vector<std::string> &args)
 
 /**
  * @brief Changes the current working directory based on the provided path argument.
- * @param args A reference to the vector of strings containing the arguments for the 'cd' command. The first element should be the target directory path.
+ * @param args A vector of strings containing the arguments for the 'cd' command. The first element should be the target directory path.
  */
 void command_cd(std::vector<std::string> &args)
 {
@@ -335,7 +335,7 @@ void command_cd(std::vector<std::string> &args)
 
 /**
  * @brief Prints the type or location of each command specified in the argument list.
- * @param args A reference to the vector of command names to look up.
+ * @param args A vector of command names to look up.
  */
 void command_type(std::vector<std::string> &args)
 {
@@ -366,7 +366,7 @@ void command_type(std::vector<std::string> &args)
 
 /**
  * @brief Exits the shell with the provided exit code.
- * @param args A reference to the vector of strings where the first element is the exit code as a string.
+ * @param args A vector of strings where the first element is the exit code as a string.
  */
 void command_exit(std::vector<std::string> &args)
 {
@@ -376,7 +376,7 @@ void command_exit(std::vector<std::string> &args)
 
 /**
  * @brief Prints the current working directory to standard output.
- * @param args A reference to the vector of strings containing the arguments for the 'pwd' command (unused).
+ * @param args A vector of strings containing the arguments for the 'pwd' command (unused).
  */
 void command_pwd(std::vector<std::string> &args)
 {
