@@ -6,13 +6,13 @@
 
 namespace builtins {
 	// PATH
-	extern const char* path_var;
+	extern std::string path_var;
 
 	// All directories in PATH
 	extern std::vector <std::string> path_dirs;
 
 	// HOME
-	extern const char* home_var;
+	extern std::string home_var;
 	extern std::filesystem::path home_path;
 
 	/**

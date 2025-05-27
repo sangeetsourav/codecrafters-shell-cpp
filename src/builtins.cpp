@@ -11,13 +11,13 @@
 
 namespace builtins {
 	// Get PATH
-	const char* path_var = std::getenv("PATH");
+	std::string path_var = std::getenv("PATH");
 
 	// Get all directories in PATH
 	std::vector <std::string> path_dirs = util::split(path_var, ':');
 
 	// Get HOME
-	const char* home_var = std::getenv("HOME");
+	std::string home_var = std::getenv("HOME");
 	std::filesystem::path home_path = home_var;
 
 	/**

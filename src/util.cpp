@@ -148,7 +148,10 @@ namespace util {
 		return tokens;
 	}
 
-	std::map<std::string, std::string> remember_exec_paths;
+	/**
+	 * @brief A map used to cache command path searches.
+	 */
+	std::map<std::string, std::string> exec_cache;
 
 	/**
 	 * @brief Searches for an executable file with the specified name in the given list of directories.
@@ -157,17 +160,36 @@ namespace util {
 	 */
 	std::string find_exec_in_path(std::string command)
 	{
-		if (remember_exec_paths.count(command) != 0)
+		// Reload PATH
+		std::string curr_path_var = std::getenv("PATH");
+
+		// Check if path has changed
+		bool path_changed = false;
+		if (curr_path_var.compare(builtins::path_var) != 0)
 		{
-			return remember_exec_paths[command];
+			// Update the path and the path directories
+			builtins::path_var = curr_path_var;
+			builtins::path_dirs = util::split(builtins::path_var, ':');
+			path_changed = true;
 		}
 
-		std::string exec_path = "";
+		// Clear command path cache if path has been updated
+		if (path_changed)
+		{
+			exec_cache.clear();
+		}
 
-		// It will look through the path directories
+		// Check the cache first
+		if (exec_cache.count(command) != 0)
+		{
+			return exec_cache[command];
+		}
+
+		// Look through the path directories
+		std::filesystem::directory_iterator iter_dir;
+
 		for (const auto& dir : builtins::path_dirs)
 		{
-			std::filesystem::directory_iterator iter_dir;
 			// Try to access the directory
 			try
 			{
@@ -179,19 +201,22 @@ namespace util {
 				continue;
 			}
 
-			for (const auto& entry : std::filesystem::directory_iterator(dir))
+			// Go through each file
+			for (const auto& entry : iter_dir)
 			{
 				if (command == entry.path().filename())
 				{
-					// Store in memor
-					exec_path = entry.path().string();
+					// Cache the path for this command for future use
+					exec_cache[command] = entry.path().string();
+
+					return exec_cache[command];
 				}
 			}
 		}
 
-		// Remember path for this command for future use
-		remember_exec_paths[command] = exec_path;
+		// If execution has reached here then the command has not been found
+		exec_cache[command] = "";
 
-		return exec_path;
+		return exec_cache[command];
 	}
 }
