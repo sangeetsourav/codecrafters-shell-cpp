@@ -149,11 +149,6 @@ namespace util {
 	}
 
 	/**
-	 * @brief A map used to cache command path searches.
-	 */
-	std::map<std::string, std::string> exec_cache;
-
-	/**
 	 * @brief Searches for an executable file with the specified name in the given list of directories.
 	 * @param command The name of the executable file to search for.
 	 * @return The full path to the found executable file, or an empty string if not found.
@@ -161,29 +156,8 @@ namespace util {
 	std::string find_exec_in_path(std::string command)
 	{
 		// Reload PATH
-		std::string curr_path_var = std::getenv("PATH");
-
-		// Check if path has changed
-		bool path_changed = false;
-		if (curr_path_var.compare(builtins::path_var) != 0)
-		{
-			// Update the path and the path directories
-			builtins::path_var = curr_path_var;
-			builtins::path_dirs = util::split(builtins::path_var, ':');
-			path_changed = true;
-		}
-
-		// Clear command path cache if path has been updated
-		if (path_changed)
-		{
-			exec_cache.clear();
-		}
-
-		// Check the cache first
-		if (exec_cache.count(command) != 0)
-		{
-			return exec_cache[command];
-		}
+		builtins::path_var = std::getenv("PATH");
+		builtins::path_dirs = util::split(builtins::path_var, ':');
 
 		// Look through the path directories
 		std::filesystem::directory_iterator iter_dir;
@@ -206,17 +180,12 @@ namespace util {
 			{
 				if (command == entry.path().filename())
 				{
-					// Cache the path for this command for future use
-					exec_cache[command] = entry.path().string();
-
-					return exec_cache[command];
+					// Return the path
+					return entry.path().string();
 				}
 			}
 		}
 
-		// If execution has reached here then the command has not been found
-		exec_cache[command] = "";
-
-		return exec_cache[command];
+		return "";
 	}
 }
