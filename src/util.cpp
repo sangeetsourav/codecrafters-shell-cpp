@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <filesystem>
+#include <cstring>
 #include "util.hpp"
 #include "builtins.hpp"
 
@@ -187,5 +188,125 @@ namespace util {
 		}
 
 		return "";
+	}
+
+	void Trie::insert(std::string& word)
+	{
+		TrieNode* curr = &root;
+
+		for (auto c : word)
+		{
+			if (curr->children.count(c) == 0)
+			{
+				curr->children[c] = new TrieNode(false);
+			}
+
+			curr = curr->children[c];
+		}
+
+		curr->end_of_word = true;
+	}
+
+	bool Trie::search(std::string& word)
+	{
+		TrieNode* curr = &root;
+
+		for (auto c : word)
+		{
+			if (curr->children.count(c) == 0)
+			{
+				return false;
+			}
+
+			curr = curr->children[c];
+		}
+
+		return curr->end_of_word;
+	}
+
+	std::vector<std::string> Trie::matches(std::string partial_word)
+	{
+		TrieNode* curr = &root;
+		std::vector<std::string> matches;
+
+		for (auto c : partial_word)
+		{
+			if (curr->children.count(c) != 0)
+			{
+				curr = curr->children[c];
+			}
+		}
+
+		if (curr->is_root)
+		{
+			return matches;
+		}
+		else
+		{
+			return go_deep(curr, partial_word);
+		}
+	}
+
+	std::vector<std::string> Trie::go_deep(TrieNode* node, std::string word)
+	{
+		std::vector<std::string> words;
+
+		if (node->children.empty())
+		{
+			words.push_back(word);
+			return words;
+		}
+		else
+		{
+			for (const auto& kv : node->children)
+			{
+				std::string new_word = word;
+				new_word.push_back(kv.first);
+
+				if (node->end_of_word)
+				{
+					words.push_back(new_word);
+				}
+
+				std::vector<std::string> child_words = go_deep(node->children[kv.first], new_word);
+
+				words.insert(words.end(), child_words.begin(), child_words.end());
+			}
+
+		}
+
+		return words;
+	}
+
+	Trie_Builtins trie_builtin(builtins::commands);
+
+	/**
+	 * @brief Generates possible completions for a given input text.
+	 * @param text The partial text for which to generate a completion.
+	 * @param state It is zero the first time the function is called, allowing the generator to perform any necessary initialization, and a positive non-zero integer for each subsequent call.
+	 * @return A pointer to a string containing the next possible completion, or NULL if there are no more completions.
+	 */
+	char* completion_generator(const char* text, int state)
+	{
+		static std::vector<std::string> matches;
+		static int match_index;
+
+		if (state==0)
+		{
+			matches = util::trie_builtin.matches(text);
+			match_index = 0;
+		}
+
+		char* match = NULL;
+
+		if (match_index < matches.size())
+		{	
+			// Use strdup to allocate space on the heap. (It copies the string and the calls malloc)
+			// If it is allocated on the stack then the pointer would be invalid when this function goes out of scope.
+			match = strdup(matches[match_index].c_str());
+			match_index++;
+		}
+
+		return match;
 	}
 }

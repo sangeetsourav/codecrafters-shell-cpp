@@ -11,6 +11,9 @@ int main() {
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
 
+	// This is our custom completion generator
+	rl_completion_entry_function = util::completion_generator;
+
 	while (true)
 	{
 

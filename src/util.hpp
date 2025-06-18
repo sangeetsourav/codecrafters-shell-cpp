@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 
 namespace util {
 	/**
@@ -24,4 +25,51 @@ namespace util {
 	 * @return The full path to the found executable file, or an empty string if not found.
 	 */
 	std::string find_exec_in_path(std::string command);
+
+	/**
+	 * @brief Generates possible completions for a given input text.
+	 * @param text The partial text for which to generate a completion.
+	 * @param state It is zero the first time the function is called, allowing the generator to perform any necessary initialization, and a positive non-zero integer for each subsequent call.
+	 * @return A pointer to a string containing the next possible completion, or NULL if there are no more completions.
+	 */
+	char* completion_generator(const char* text, int state);
+
+	class TrieNode
+	{
+	public:
+		std::map<char, TrieNode*> children;
+		bool end_of_word = false;
+		bool is_root = false;
+
+		TrieNode(bool root)
+		{
+			is_root = root;
+		}
+	};
+
+	class Trie
+	{
+	public:
+		TrieNode root{ true };
+
+		void insert(std::string &word);
+		bool search(std::string& word);
+		std::vector<std::string> go_deep(TrieNode* node, std::string word);
+		std::vector<std::string> matches(std::string partial_word);
+	};
+
+	class Trie_Builtins : public Trie
+	{
+	public:
+		Trie_Builtins(std::map<std::string, std::pair<std::string, void(*)(std::vector<std::string>&)>> commands)
+		{
+			for (const auto &kv: commands)
+			{
+				std::string word = kv.first;
+				insert(word);
+			}
+		}
+	};
+
+	extern Trie_Builtins trie_builtin;
 }
