@@ -278,7 +278,39 @@ namespace util {
 		return words;
 	}
 
-	Trie_Builtins trie_builtin(builtins::commands);
+	void Trie_Commands::update_from_path()
+	{
+		// Reload PATH
+		builtins::path_var = std::getenv("PATH");
+		builtins::path_dirs = util::split(builtins::path_var, ':');
+
+		// Look through the path directories
+		std::filesystem::directory_iterator iter_dir;
+
+		for (const auto& dir : builtins::path_dirs)
+		{
+			// Try to access the directory
+			try
+			{
+				iter_dir = std::filesystem::directory_iterator(dir);
+			}
+			// Skip if failed
+			catch (const std::filesystem::filesystem_error)
+			{
+				continue;
+			}
+
+			// Go through each file
+			for (const auto& entry : iter_dir)
+			{
+				std::string fname = entry.path().filename().string();
+				insert(fname);
+			}
+		}
+
+	}
+
+	Trie_Commands commands_all;
 
 	/**
 	 * @brief Generates possible completions for a given input text.
@@ -293,7 +325,8 @@ namespace util {
 
 		if (state==0)
 		{
-			matches = util::trie_builtin.matches(text);
+			commands_all.update_from_path();
+			matches = util::commands_all.matches(text);
 			match_index = 0;
 		}
 

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "builtins.hpp"
 
 namespace util {
 	/**
@@ -58,18 +59,21 @@ namespace util {
 		std::vector<std::string> matches(std::string partial_word);
 	};
 
-	class Trie_Builtins : public Trie
+	class Trie_Commands : public Trie
 	{
 	public:
-		Trie_Builtins(std::map<std::string, std::pair<std::string, void(*)(std::vector<std::string>&)>> commands)
+		Trie_Commands()
 		{
-			for (const auto &kv: commands)
+			// Add the builtins
+			for (const auto &kv: builtins::commands)
 			{
 				std::string word = kv.first;
 				insert(word);
 			}
 		}
+
+		void update_from_path();
 	};
 
-	extern Trie_Builtins trie_builtin;
+	extern Trie_Commands commands_all;
 }
