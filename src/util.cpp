@@ -263,7 +263,7 @@ namespace util {
 				std::string new_word = word;
 				new_word.push_back(kv.first);
 
-				if (node->end_of_word)
+				if (kv.second->end_of_word)
 				{
 					words.push_back(new_word);
 				}

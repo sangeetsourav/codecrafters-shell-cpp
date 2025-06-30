@@ -19,7 +19,7 @@ The goal: understand how real shells work.
 
 ✅ Support for input/output redirection
 
-✅ Command tab-completion and history based on the readline library
+✅ Command tab-completion and history based on the readline library. Tab-completion based on the Trie data structure
 
 (Work in progress — more features planned!)
 
