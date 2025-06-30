@@ -4,6 +4,7 @@
 #include <sstream>
 #include <filesystem>
 #include <cstring>
+#include <unistd.h>
 #include "util.hpp"
 #include "builtins.hpp"
 
@@ -179,10 +180,13 @@ namespace util {
 			// Go through each file
 			for (const auto& entry : iter_dir)
 			{
-				if (command == entry.path().filename())
+				if (!access(entry.path().c_str(), X_OK))
 				{
-					// Return the path
-					return entry.path().string();
+					if (command == entry.path().filename())
+					{
+						// Return the path
+						return entry.path().string();
+					}
 				}
 			}
 		}
